@@ -4,15 +4,31 @@
 
 name: CI
 
-on: pull_request
+on:
+  - pull_request
+  - push
 
 concurrency:
   group: ${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
-  puppet:
-    name: Puppet
-    uses: voxpupuli/gha-puppet/.github/workflows/beaker.yml@v2
-    with:
-      pidfile_workaround: 'false'
+  acceptance:
+    runs-on: ubuntu-22.04
+    env:
+      BUNDLE_WITHOUT: development:test:release
+    steps:
+      - run: sudo apt-get install -y vagrant vagrant-libvirt libvirt-clients libvirt-daemon-system libvirt-daemon qemu qemu-system-x86
+      - run: sudo chmod 666 /var/run/libvirt/libvirt-sock
+      - uses: actions/checkout@v4
+      - name: Setup ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - name: Run tests
+        run: bundle exec rake beaker
+        env:
+          BEAKER_PUPPET_COLLECTION: none
+          BEAKER_SETFILE: freebsd13-64{hostname=freebsd13-64-none.example.com}
+          BEAKER_HYPERVISOR: vagrant

@@ -17,6 +17,8 @@ end
 
 group :system_tests do
   gem 'voxpupuli-acceptance', '~> 3.0',  :require => false
+  gem 'beaker-vagrant'
+  gem 'beaker_puppet_helpers', github: 'evgeni/beaker_puppet_helpers', branch: 'freebsd'
 end
 
 group :release do
